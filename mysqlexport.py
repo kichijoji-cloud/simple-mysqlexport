@@ -3,7 +3,7 @@ import mysql.connector
 import csv
 import json
 
-def export_to_tsv(username, password, host, db_name, table_name, columns, output_file):
+def export_to_tsv(username, password, host, db_name, table_name, columns, output_file, fields_enclosed_by=None):
 	# MySQLに接続
 	connection = mysql.connector.connect(
 		user=username,
@@ -28,7 +28,7 @@ def export_to_tsv(username, password, host, db_name, table_name, columns, output
 
 	# TSVファイルに書き込み
 	with open(output_file, 'w', newline='', encoding='utf-8') as tsvfile:
-		tsv_writer = csv.writer(tsvfile, delimiter='\t')
+		tsv_writer = csv.writer(tsvfile, delimiter='\t', quotechar=fields_enclosed_by, quoting=csv.QUOTE_MINIMAL)
 
 		# カラム名を書き込み
 		tsv_writer.writerow(columns)
@@ -48,6 +48,7 @@ def load_config_from_json(config_file):
 def main():
 	parser = argparse.ArgumentParser(description='Export MySQL table to TSV file')
 	parser.add_argument('--config', help='JSON config file with MySQL connection details and export options')
+
 	args, remaining_args = parser.parse_known_args()
 
 	if args.config:
@@ -60,8 +61,10 @@ def main():
 		parser.add_argument('--table', required=True, help='Table name')
 		parser.add_argument('--columns', nargs='+', required=True, help='Columns to export')
 		parser.add_argument('--output', required=True, help='Output file name')
+		parser.add_argument('--fields-enclosed-by', help='Character to enclose fields')
+
 		config = vars(parser.parse_args(remaining_args))
-	
+
 	export_to_tsv(
 		config['user'],
 		config['password'],
@@ -69,7 +72,8 @@ def main():
 		config['db'],
 		config['table'],
 		config['columns'],
-		config['output']
+		config['output'],
+		config.get('fields_enclosed_by')
 	)
 
 if __name__ == "__main__":
