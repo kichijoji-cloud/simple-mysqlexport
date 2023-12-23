@@ -33,6 +33,7 @@ python mysqlexport.py --user your_username --password your_password --host your_
 - `--columns`: Columns to export (multiple columns can be specified).
 - `--output`: Output file name for the TSV file.
 - `--fields-enclosed-by`: Character to enclose fields.(optional)
+- `--delimiter: delimiter default \\t(tsv)`
 
 ### Example JSON Config File
 ```json
@@ -44,7 +45,8 @@ python mysqlexport.py --user your_username --password your_password --host your_
   "table": "your_table",
   "columns": ["column1", "column2"],
   "output": "output_file.tsv",
-  "fields_enclosed_by": ""
+  "fields_enclosed_by": "",
+  "delimiter": "\t"
 }
 ```
 
