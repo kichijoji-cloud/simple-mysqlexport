@@ -1,21 +1,23 @@
 import argparse
-import mysql.connector
+import pymysql
 import csv
 import json
 
 
-
 def export_to_tsv(username, password, host, db_name, table_name, columns, output_file, fields_enclosed_by=None, delim="\t"):
 	# MySQLに接続
-	connection = mysql.connector.connect(
-		user=username,
-		password=password,
-		host=host,
-		database=db_name
-	)
+	connection=None
+	try:
+		connection = pymysql.connect(
+			user=username,
+			password=password,
+			host=host,
+			database=db_name
+		)
+	except Exception as e:
+		print(str(e))
 
 	cursor = connection.cursor()
-
 	# カラムをカンマ区切りの文字列に変換
 	columns_str = ', '.join(columns)
 
@@ -24,16 +26,12 @@ def export_to_tsv(username, password, host, db_name, table_name, columns, output
 
 	# クエリの作成
 	query = f"SELECT {columns_str} FROM {table_name} " +\
-	" where post_status = 'publish' " +\
-	" AND   post_type = 'xo_event' " +\
 	""
 
 	# クエリの実行
 	cursor.execute(query)
-
 	# 結果を取得
 	results = cursor.fetchall()
-   
 	# TSVファイルに書き込み
 	with open(output_file, 'w', newline='', encoding='utf-8') as tsvfile:
 		tsv_writer=None
@@ -41,11 +39,10 @@ def export_to_tsv(username, password, host, db_name, table_name, columns, output
 			tsv_writer = csv.writer(tsvfile, delimiter=delim, quoting=csv.QUOTE_MINIMAL)
 		else:
 			tsv_writer = csv.writer(tsvfile, delimiter=delim, quotechar=fields_enclosed_by, quoting=csv.QUOTE_ALL)
-		
+
 		#print("fields_enclosed_by: " + fields_enclosed_by)
 		# カラム名を書き込み
 		tsv_writer.writerow(columns)
-
 		# データを書き込み
 		tsv_writer.writerows(results)
 
@@ -93,6 +90,4 @@ def main():
 
 if __name__ == "__main__":
 	main()
-
-
 
